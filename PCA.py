@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import scipy.io
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import plotly.express as px
 import time
 from PIL import Image
@@ -39,7 +40,7 @@ X_mean =np.array(np.round(X_mean),dtype=np.uint8)
 
 ###### average face #########################
 img = Image.fromarray(X_mean.reshape(46,56), 'L')
-# .rotate(-90).show()
+# .rotate(-90).show()``
 avgFace = img.rotate(-90)
 # plt.title("Avergae face of traning data")
 # plt.imshow(avgFace)
@@ -47,39 +48,93 @@ avgFace = img.rotate(-90)
 
 A = training_data - X_mean.reshape((n_dim,1)) if zero_centered else training_data
 
+def Our_PCA(low_D=True):
+  cov_matrix = (1/n_samples) * np.matmul(A.T, A) if low_D else (1/n_samples) * np.matmul(A, A.T)    #choose dimensionality
+  u, s = np.linalg.eig(cov_matrix)
+  return u, s 
+
 highD_covariance, lowD_covariance = np.matmul(A, A.T)/416 ,  np.matmul(A.T, A)/416
 M = 50
 
 ###################################################################
-######### high dimenstional PCA ###################################
+######### high dimensional PCA ###################################
 start_time = time.time()
 
-w1, v1 = np.linalg.eig(highD_covariance)
+eig_val1, eig_vec1 = Our_PCA(False)
+
+index_eig1 = {}
+
+for i in range(len(eig_val1)):
+    index_eig1[eig_val1[i]] = i
+
+eig_val1 = -np.sort(-eig_val1)
+
+top_M_eigVal1 = eig_val1[:M]
+top_M_eigVec1 = np.zeros([2576, M])
+
+for i in range(M):
+    top_M_eigVec1[:, i] = eig_vec1[:,index_eig1[top_M_eigVal1[i]]]
+
+fig1 = go.Figure()
+fig1.add_trace(go.Scatter(y=top_M_eigVal1[:20],
+                    mode='lines',
+                    name='High-D'))
+
+fig2 = plt.figure()
+ax1 = fig2.add_subplot(1, 3, 1)
+img = ax1.imshow(np.reshape(top_M_eigVec1[:, 3],(46,56)).T)
 
 
-w1 = -np.sort(-w1)
 
-print("w1:",w1)
-# print(c)
+img2 = fig2.add_subplot(1, 3, 2)
+img2.imshow(np.reshape(top_M_eigVec1[:, 4],(46,56)).T)
+
+
+
+img3 = fig2.add_subplot(1, 3, 3)
+img3.imshow(np.reshape(top_M_eigVec1[:, 5],(46,56)).T)
+
 
 end_time = time.time()
 totalRun_time = end_time - start_time
+print("High Dimebsional PCA eigenvector shape:", top_M_eigVec1.shape)
+print("High Dimensional PCA time taken:", totalRun_time)
 ###################################################################
 
+
+
 ###################################################################
-######### low dimenstional PCA ###################################
+######### low dimensional PCA ###################################
 start_time = time.time()
 
-w2, v2 = np.linalg.eig(lowD_covariance)
+eig_val2, eig_vec2 = Our_PCA(True)
+
+index_eig2 = {}
+
+for i in range(len(eig_val2)):
+    index_eig2[eig_val2[i]] = i
+
+eig_val2 = -np.sort(-eig_val2)
+
+top_M_eigVal2 = eig_val2[:M]
+top_M_eigVec2 = np.zeros([416, M])
+
+for i in range(M):
+    top_M_eigVec2[:,i] = eig_vec2[:,index_eig2[top_M_eigVal2[i]]]
+
+fig1.add_trace(go.Scatter(y=top_M_eigVal2[:20],
+                    mode='lines',
+                    name='Low-D'))
 
 end_time = time.time()
 totalRun_time = end_time - start_time
+print("low Dimebsional PCA eigenvector shape:", top_M_eigVec2.shape)
+print("low Dimensional PCA time taken:", totalRun_time)
 ###################################################################
 
-
-
-
-
+fig1.update_layout(xaxis_title="Number of eigenvectors with non-zero eigenvalues",
+                   yaxis_title="Eigenvalue")
+fig1.show()
 
 
 
