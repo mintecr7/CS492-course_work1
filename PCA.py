@@ -80,21 +80,6 @@ fig1.add_trace(go.Scatter(y=top_M_eigVal1[:20],
                     mode='lines',
                     name='High-D'))
 
-fig2 = plt.figure()
-ax1 = fig2.add_subplot(1, 3, 1)
-img = ax1.imshow(np.reshape(top_M_eigVec1[:, 3],(46,56)).T)
-
-
-
-img2 = fig2.add_subplot(1, 3, 2)
-img2.imshow(np.reshape(top_M_eigVec1[:, 4],(46,56)).T)
-
-
-
-img3 = fig2.add_subplot(1, 3, 3)
-img3.imshow(np.reshape(top_M_eigVec1[:, 5],(46,56)).T)
-
-
 end_time = time.time()
 totalRun_time = end_time - start_time
 print("High Dimebsional PCA eigenvector shape:", top_M_eigVec1.shape)
