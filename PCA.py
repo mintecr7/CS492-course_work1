@@ -53,18 +53,18 @@ cov_matrix_high = (1/n_samples) * np.dot(A, A.T)    #covariance matrix high dime
 eigenvectors_high, eigenvalues_high, _ = np.linalg.svd(cov_matrix_high, full_matrices=True)
 t1 = time.time()
 
-# print("High-D execution time: ", t1 - t0)
-# print("High-D Rank: ", np.linalg.matrix_rank(cov_matrix_high))
-# print(f"High-D Shape of eigenvectors: {eigenvectors_high.shape}, Shape of eigenvalues: {eigenvalues_high.shape}")
+print("High-D execution time: ", t1 - t0)
+print("High-D Rank: ", np.linalg.matrix_rank(cov_matrix_high))
+print(f"High-D Shape of eigenvectors: {eigenvectors_high.shape}, Shape of eigenvalues: {eigenvalues_high.shape}")
 
 t0 = time.time()
 cov_matrix_low = (1/n_samples) * np.dot(A.T, A)     #covariance matrix low dimensionality
 eigenvectors_low, eigenvalues_low, _ = np.linalg.svd(cov_matrix_low, full_matrices=True)
 print("low shape:" , eigenvectors_low.shape)
 t1 = time.time()
-# print("Low-D execution time: ", t1 - t0)
-# print("Low-D Rank: ", np.linalg.matrix_rank(cov_matrix_low))
-# print(f"Low-D Shape of eigenvectors: {eigenvectors_low.shape}, Shape of eigenvalues: {eigenvalues_low.shape}")
+print("Low-D execution time: ", t1 - t0)
+print("Low-D Rank: ", np.linalg.matrix_rank(cov_matrix_low))
+print(f"Low-D Shape of eigenvectors: {eigenvectors_low.shape}, Shape of eigenvalues: {eigenvalues_low.shape}")
 
 non_zero_eigenvalues_high = [x for x in eigenvalues_high if round(x,4) > 0]
 non_zero_eigenvalues_low = [x for x in eigenvalues_low if round(x,4) > 0]
