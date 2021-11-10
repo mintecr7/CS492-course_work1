@@ -143,4 +143,66 @@ if M == 3:
   fig.show()
 
 
+projected_train_df = pd.DataFrame(projection_coeff)
+projected_train_df["label"] = 0
+label = 1
+for i in range(0, n_samples, training_size):
+  projected_train_df.iloc[i:i+training_size, -1] = label
+  label += 1
+
+projected_test_df = pd.DataFrame(np.dot((test_data - X_mean.reshape((n_dim,1))).T, top_eigenvectors)) #104xM
+projected_test_df["label"] = 0
+label = 1
+for i in range(0, test_size * 52, test_size):
+  projected_test_df.iloc[i:i+training_size, -1] = label
+  label += 1
+
+classifier = KNeighborsClassifier(n_neighbors=1)
+classifier.fit(projected_train_df.iloc[:,:-1], projected_train_df["label"])
+y_pred = classifier.predict(projected_test_df.iloc[:,:-1])
+print("Accuracy of PCA facial detection with M = {}: {}%".format(M, round(accuracy_score(projected_test_df["label"], y_pred)*100, 1)))
+
+
+fig3 = go.Figure()
+for k in [1, 3, 5, 9, 11]:
+  vect, acc = [], []
+  for M in range(1, 416, 15):
+    reconstructed_images = np.zeros(training_data.shape)
+    top_eigenvectors = eigenvectors_calculated_from_low[:, :M]  #DxM
+    projection_coeff = np.dot(A.T, top_eigenvectors)  #NxM each row is coefficient of projection of each image in to the space spanned by the top eigenvectors
+    for i in range(n_samples):
+      projected = np.multiply(projection_coeff[i, :], top_eigenvectors)   #a1u1, a2u2, ...
+      reconstructed_images[:, i] = X_mean + np.sum(projected, axis=1)   #x_mean + a1u1 + a2u2
+    ## Accuracy measurement with M eigenvectors
+    projected_train_df = pd.DataFrame(projection_coeff)
+    projected_train_df["label"] = 0
+    label = 1
+    for i in range(0, n_samples, training_size):
+      projected_train_df.iloc[i:i+training_size, -1] = label
+      label += 1
+
+    projected_test_df = pd.DataFrame(np.dot((test_size - X_mean.reshape((n_dim,1))).T, top_eigenvectors)) #104xM
+    projected_test_df["label"] = 0
+    label = 1
+    for i in range(0, test_size * 52, test_size):
+      projected_test_df.iloc[i:i+training_size, -1] = label
+      label += 1
+
+    classifier = KNeighborsClassifier(n_neighbors=k)
+    classifier.fit(projected_train_df.iloc[:,:-1], projected_train_df["label"])
+    y_pred = classifier.predict(projected_test_df.iloc[:,:-1])
+    vect.append(M)
+    acc.append(round(accuracy_score(projected_test_df["label"], y_pred)*100, 1))
+  fig3.add_trace(go.Scatter(x=vect, y=acc,
+                    mode='lines',
+                    name='K='+ str(k)))
+# Edit the layout
+fig3.update_layout(title='Face detection accuracy for different K and M values',
+                   xaxis_title='M',
+                   yaxis_title='Accuracy',
+                   width=1100,
+                   height=550)
+fig3.show()
+
+
 plt.show()
