@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import scipy.io
 import matplotlib.pyplot as plt
@@ -158,6 +159,8 @@ if show_images:
 
 print("PCA_LDA is completed\n")
 # The projection of each class mean on the Eigenspace
+
+start_time = time.time()
 W_of_classes = np.zeros((M_lda,num_of_classes))
 for class_index in range(num_of_classes):
   for ind in range(M_lda):
@@ -198,7 +201,7 @@ print("got", gotIt,"and failed ", failed,"accuracy = {:.2f}".format((gotIt /test
 
 
 
-loop_through = True
+loop_through = False
 # Try on different combinations of M_pca and M_lda
 if loop_through:
 	mpca_index = 0
@@ -314,5 +317,5 @@ if loop_through:
 	    table[mpca_index,mlda_index] = (gotIt /test_size)*100
 	    mlda_index +=1
 	  mpca_index+=1
-
-print("DONE!")
+end_time = time.time()
+print("DONE! LDA time:", end_time - start_time)
